@@ -13,6 +13,7 @@ func main() {
 	cflag := flag.Bool("c", false, "counts the number the bytes in the file")
 	lflag := flag.Bool("l", false, "counts the number the lines in the file")
 	wflag := flag.Bool("w", false, "counts the number the words in the file")
+	mflag := flag.Bool("m", false, "counts the number the multibyte in the file")
 	flag.Parse()
 
 	// fmt.Println(*cflag)
@@ -53,4 +54,14 @@ func main() {
 		fmt.Println(counter)
 	}
 
+	if *mflag {
+		bytes, _ := io.ReadAll(file)
+		str := string(bytes)
+		counter := 0
+
+		for range str {
+			counter++
+		}
+		fmt.Println(counter)
+	}
 }
