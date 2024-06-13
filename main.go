@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -25,13 +26,14 @@ func main() {
 	// get file name and read file
 	file_name := args[0]
 	file, _ := os.Open(file_name)
-	b, _ := io.ReadAll(file)
 
 	if *cflag {
+		b, _ := io.ReadAll(file)
 		fmt.Println(len(b))
 	}
 
 	if *lflag {
+		b, _ := io.ReadAll(file)
 		counter := 1
 		for i := 0; i < len(b); i++ {
 			if b[i] == 10 {
@@ -42,19 +44,13 @@ func main() {
 	}
 
 	if *wflag {
-
-		word_counter := 0
-
-		for i := 0; i < len(b); i++ {
-			if b[i] == 32 { // space
-				word_counter += 1
-			}
-
-			if b[i] == 10 { // new line
-				word_counter += 1
-			}
+		file_scanner := bufio.NewScanner(file)
+		file_scanner.Split(bufio.ScanWords)
+		counter := 0
+		for file_scanner.Scan() {
+			counter++
 		}
-		// word_counter++
-		fmt.Println(word_counter)
+		fmt.Println(counter)
 	}
+
 }
