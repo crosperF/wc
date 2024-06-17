@@ -7,10 +7,10 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
-	// fmt.Println("app started..")
 	cflag := flag.Bool("c", false, "counts the number the bytes in the file")
 	lflag := flag.Bool("l", false, "counts the number the lines in the file")
 	wflag := flag.Bool("w", false, "counts the number the words in the file")
@@ -27,23 +27,45 @@ func main() {
 
 	// get the file name
 	args := flag.Args()
-	// fmt.Println(args)
+	input_type := false
+	var input_text []byte
 
-	//todo - check if the file name is present
+	if len(args) == 0 {
+		input_type = true
+		input, _ := io.ReadAll(os.Stdin)
+		input_text = input
+	}
 
-	// get file name and read file
-	file_name := args[0]
-	file, _ := os.Open(file_name)
 	main_str := ""
+	var file *os.File
+
+	if !input_type {
+		// get file name and read file
+		file_name := args[0]
+		file, _ = os.Open(file_name)
+		main_str = ""
+	}
 
 	if *cflag {
-		b, _ := io.ReadAll(file)
-		main_str += " c: " + strconv.Itoa(len(b))
+		ans := 0
+		if !input_type {
+			b, _ := io.ReadAll(file)
+			ans = len(b)
+		} else {
+			ans = len(input_text)
+		}
+		main_str += " c: " + strconv.Itoa(ans)
 	}
 
 	if *lflag {
-		file.Seek(0, io.SeekStart)
-		b, _ := io.ReadAll(file)
+		b := []byte{}
+		if !input_type {
+			file.Seek(0, io.SeekStart)
+			by, _ := io.ReadAll(file)
+			b = by
+		} else {
+			b = input_text
+		}
 		counter := 1
 		for i := 0; i < len(b); i++ {
 			if b[i] == 10 {
@@ -54,20 +76,32 @@ func main() {
 	}
 
 	if *wflag {
-		file.Seek(0, io.SeekStart)
-		file_scanner := bufio.NewScanner(file)
-		file_scanner.Split(bufio.ScanWords)
 		counter := 0
-		for file_scanner.Scan() {
-			counter++
+		if !input_type {
+			file.Seek(0, io.SeekStart)
+			file_scanner := bufio.NewScanner(file)
+			file_scanner.Split(bufio.ScanWords)
+			counter = 0
+			for file_scanner.Scan() {
+				counter++
+			}
+		} else {
+			s := string(input_text)
+			counter = len(strings.Fields(s))
 		}
-		// fmt.Println(counter)
+
 		main_str += " w: " + strconv.Itoa(counter)
 	}
 
 	if *mflag {
-		file.Seek(0, io.SeekStart)
-		bytes, _ := io.ReadAll(file)
+		bytes := []byte{}
+		if !input_type {
+			file.Seek(0, io.SeekStart)
+			b, _ := io.ReadAll(file)
+			bytes = b
+		} else {
+			bytes = input_text
+		}
 		str := string(bytes)
 		counter := 0
 
